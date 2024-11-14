@@ -11,15 +11,21 @@ class Asana():
     """Base class for tap-asana"""
 
     def __init__(
-        self, client_id, client_secret, redirect_uri, refresh_token, access_token=None
+        self, client_id=None, client_secret=None, redirect_uri=None, refresh_token=None, access_token=None
     ):  # pylint: disable=too-many-arguments
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.refresh_token = refresh_token
         self.access_token = access_token
-        self._client = self._oauth_auth() or self._access_token_auth()
-        self.refresh_access_token()
+
+        if all([self.refresh_token, self.client_id, self.client_secret, self.redirect_uri]):
+            self._client = self._oauth_auth() or self._access_token_auth()
+            self.refresh_access_token()
+        elif self.access_token:
+            self._client = self._access_token_auth()
+        else:
+            raise ValueError("Invalid configuration: Must provide either refresh_token with OAuth credentials or access_token.")
 
     def _oauth_auth(self):
         """Oauth authentication for tap"""

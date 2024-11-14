@@ -32,7 +32,7 @@ $ pip install tap-asana
 
 2. Create the config file
 
-   Create a JSON file called `config.json`. Its contents should look like:
+   Create a JSON file called `config.json`. In case of using OAuth credentials its contents should look like:
 
 ```json
 {
@@ -45,12 +45,24 @@ $ pip install tap-asana
 }
 ```
 
+   or in case of using Personal Access Token for auth in Asana API it should look like:
+
+```json
+{
+  "access_token": "yyy",
+  "start_date" : "2018-02-22T02:06:58.147Z",
+  "request_timeout": 300
+}
+```
+   
    The `start_date` specifies the date at which the tap will begin pulling data
    (for those resources that support this).
 
    The `client_id`, `client_secret`, `redirect_uri`, and `refresh_token` can be generated following these [Asana OAuth instructions](https://developers.asana.com/docs/oauth).
 
    The `request_timeout` specifies the timeout for the requests. Default: 300
+
+   The `access_token` is a Personal Access Token (PAT) - the quickest and simplest way to authenticate in the API. PATs are generated in the Asana developer console. See the [PATs documentation](https://developers.asana.com/docs/personal-access-token) for more information.
 
 4. Run the Tap in Discovery Mode
 

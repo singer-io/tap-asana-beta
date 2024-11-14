@@ -14,7 +14,7 @@ from tap_asana.asana import Asana
 from tap_asana.context import Context
 import tap_asana.streams  # Load stream objects into Context
 
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_KEYS_OAUTH = [
     "start_date",
     "client_id",
     "client_secret",
@@ -22,6 +22,10 @@ REQUIRED_CONFIG_KEYS = [
     "refresh_token",
 ]
 
+REQUIRED_CONFIG_KEYS_ACCESS_TOKEN = [
+    "start_date",
+    "access_token",
+]
 
 LOGGER = singer.get_logger()
 
@@ -169,16 +173,27 @@ def main():
     Run discover mode or sync mode.
     """
     # Parse command line arguments
-    args = utils.parse_args(REQUIRED_CONFIG_KEYS)
+    try:
+        args = utils.parse_args(REQUIRED_CONFIG_KEYS_OAUTH)
+    except Exception as exc:
+        if "missing required keys" in str(exc):
+            args = utils.parse_args(REQUIRED_CONFIG_KEYS_ACCESS_TOKEN)
+        else:
+            raise Exception from exc
+
+    if "access_token" in args.config:
+        creds = {
+            "access_token": args.config["access_token"],
+        }
+    else:
+        creds = {
+            "client_id": args.config["client_id"],
+            "client_secret": args.config["client_secret"],
+            "redirect_uri": args.config["redirect_uri"],
+            "refresh_token": args.config["refresh_token"],
+        }
 
     # Set context.
-    creds = {
-        "client_id": args.config["client_id"],
-        "client_secret": args.config["client_secret"],
-        "redirect_uri": args.config["redirect_uri"],
-        "refresh_token": args.config["refresh_token"],
-    }
-
     # As we passed 'request_timeout', we need to add a whole 'args.config' rather than adding 'creds'
     Context.config = args.config
     Context.state = args.state
